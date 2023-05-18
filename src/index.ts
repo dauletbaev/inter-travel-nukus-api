@@ -4,6 +4,7 @@ import { serializerCompiler, validatorCompiler, ZodTypeProvider } from 'fastify-
 import { PrismaClient } from '@prisma/client';
 import fastifyFormbody from '@fastify/formbody';
 import qs from 'qs';
+import axios from 'axios';
 
 import { ENV_SCHEMA } from './schemas/env';
 import {
@@ -26,6 +27,7 @@ import {
 } from './schemas/product';
 import checkSign from './utils/checkSign';
 
+const env = ENV_SCHEMA.parse(process.env);
 const prisma = new PrismaClient();
 const app = fastify({ logger: false });
 
@@ -68,7 +70,7 @@ app.withTypeProvider<ZodTypeProvider>().route({
     const isValid = checkSign({
       click_trans_id: body.click_trans_id,
       service_id: body.service_id,
-      secret_key: process.env.SECRET_KEY,
+      secret_key: env.SECRET_KEY,
       merchant_trans_id: body.merchant_trans_id.toString(),
       amount: body.amount,
       action: 0,
@@ -170,7 +172,7 @@ app.withTypeProvider<ZodTypeProvider>().route({
     const isValid = checkSign({
       click_trans_id: body.click_trans_id,
       service_id: body.service_id,
-      secret_key: process.env.SECRET_KEY,
+      secret_key: env.SECRET_KEY,
       merchant_trans_id: body.merchant_trans_id.toString(),
       merchant_prepare_id: body.merchant_prepare_id,
       amount: body.amount,
@@ -193,7 +195,10 @@ app.withTypeProvider<ZodTypeProvider>().route({
       where: { id: transaction_id },
       include: {
         product: {
-          select: { price: true },
+          select: { price: true, city: true, country: true },
+        },
+        user: {
+          select: { id: true, phone: true, first_name: true, last_name: true },
         },
       },
     });
@@ -233,6 +238,23 @@ app.withTypeProvider<ZodTypeProvider>().route({
         where: { id: transaction_id },
         data: { paid: true },
       });
+
+      const transactionText = [
+        `🧾 Новая транзакция:`,
+        `🆔 Сделка: ${transaction_id}`,
+        `👤 Пользователь: `,
+        `📞 Телефон: ${transactionExists.user.phone}`,
+        `ℹ️ Имя: ${transactionExists.user.first_name} ${transactionExists.user.last_name}`,
+        `✈️ Страна: ${transactionExists.product.country}`,
+        `🌆 Город: ${transactionExists.product.city}`,
+        `Оплачено`,
+      ];
+
+      await axios.post(`https://api.telegram.org/bot${env.BOT_TOKEN}/sendMessage`, {
+        chat_id: env.CHAT_ID,
+        text: transactionText.join('\n'),
+      });
+
     } catch (err) {
       return res.send({
         click_trans_id: 0,
@@ -268,7 +290,7 @@ app.withTypeProvider<ZodTypeProvider>().route({
     const { body } = req;
     const product = await prisma.product.findUnique({
       where: { id: body.product_id },
-      select: { id: true, price: true },
+      select: { id: true, price: true, city: true, country: true },
     });
 
     if (!product) {
@@ -302,6 +324,24 @@ app.withTypeProvider<ZodTypeProvider>().route({
         product_id: product.id,
       },
       select: { id: true },
+    });
+
+    const transactionText = [
+      `🧾 Новая транзакция:`,
+      `🆔 Сделка: ${transaction.id}`,
+      `🆔 Продукт: ${product.id}`,
+      `👤 Пользователь: `,
+      `📞 Телефон: ${body.phone}`,
+      `ℹ️ Имя: ${body.first_name} ${body.last_name}`,
+      `✈️ Страна: ${product.country}`,
+      `🌆 Город: ${product.city}`,
+      `💵 Стоимость: ${product.price}`,
+      `💳 Оплачено: 0`,
+    ];
+
+    await axios.post(`https://api.telegram.org/bot${env.BOT_TOKEN}/sendMessage`, {
+      chat_id: env.CHAT_ID,
+      text: transactionText.join('\n'),
     });
 
     return res.send({
@@ -345,8 +385,6 @@ app.withTypeProvider<ZodTypeProvider>().route({
 async function run() {
   await app.ready();
   await app.listen({ port: 7812 });
-
-  ENV_SCHEMA.parse(process.env);
 
   console.log('🚀 Server ready at: http://localhost:7812');
 }
