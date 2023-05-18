@@ -3,5 +3,4 @@ dist/
 .env
 
 # Don't ignore your real repository
-prisma/migrations
 *.db*

@@ -19,6 +19,11 @@ import {
   TRANSACTION_200_RESPONSE_SCHEMA,
   TRANSACTION_400_RESPONSE_SCHEMA,
 } from './schemas/transaction';
+import {
+  PRODUCT_200_RESPONSE_SCHEMA,
+  PRODUCT_400_RESPONSE_SCHEMA,
+  PRODUCT_REQUEST_SCHEMA,
+} from './schemas/product';
 import checkSign from './utils/checkSign';
 
 const prisma = new PrismaClient();
@@ -285,6 +290,7 @@ app.withTypeProvider<ZodTypeProvider>().route({
           first_name: body.first_name,
           last_name: body.last_name,
           phone: body.phone,
+
         },
         select: { id: true },
       });
@@ -306,13 +312,43 @@ app.withTypeProvider<ZodTypeProvider>().route({
   },
 });
 
+// Create product route
+app.withTypeProvider<ZodTypeProvider>().route({
+  method: 'POST',
+  url: '/products',
+  schema: {
+    body: PRODUCT_REQUEST_SCHEMA,
+    response: {
+      200: PRODUCT_200_RESPONSE_SCHEMA,
+      400: PRODUCT_400_RESPONSE_SCHEMA,
+    },
+  },
+  handler: async (req, res) => {
+    const { body } = req;
+
+    const product = await prisma.product.create({
+      data: {
+        city: body.city,
+        price: body.price,
+        country: body.country,
+        date: body.date,
+      },
+      select: { id: true },
+    });
+
+    return res.send({
+      product_id: product.id,
+    });
+  },
+});
+
 async function run() {
   await app.ready();
-  await app.listen({ port: 8000 });
+  await app.listen({ port: 7812 });
 
   ENV_SCHEMA.parse(process.env);
 
-  console.log('🚀 Server ready at: http://localhost:8000');
+  console.log('🚀 Server ready at: http://localhost:7812');
 }
 
 run().catch(async (err) => {

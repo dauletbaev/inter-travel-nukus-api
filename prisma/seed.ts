@@ -7,21 +7,29 @@ const productData: Prisma.ProductCreateInput[] = [
     city: 'Tashkent',
     country: 'Uzbekistan',
     price: 500,
+    date: '2021-10-10',
+    people: 5,
   },
   {
     city: 'New York',
     country: 'USA',
     price: 20_000_000,
+    date: '2021-10-10',
+    people: 2,
   },
   {
     city: 'Paris',
     country: 'France',
     price: 12_000_000,
+    date: '2021-10-10',
+    people: 3,
   },
   {
     city: 'Berlin',
     country: 'Germany',
     price: 9_000_000,
+    date: '2021-10-10',
+    people: 4,
   },
 ];
 
