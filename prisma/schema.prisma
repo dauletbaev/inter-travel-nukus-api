@@ -22,9 +22,7 @@ model Product {
   id          Int           @id @default(autoincrement())
   city        String
   country     String
-  people      Int           @default(1)
   price       Int
-  date        String
   Transaction Transaction[]
 
   @@map("products")
@@ -40,6 +38,8 @@ model Transaction {
   product        Product @relation(fields: [product_id], references: [id])
   user           User    @relation(fields: [user_id], references: [id])
   paid           Boolean @default(false)
+  people         Int     @default(1)
+  date           String
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

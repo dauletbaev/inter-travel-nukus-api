@@ -5,6 +5,8 @@ export const TRANSACTION_REQUEST_SCHEMA = z.object({
   last_name: z.string().describe('Last name of the customer'),
   phone: z.string().describe('Phone number of the customer'),
   product_id: z.number().int().describe('ID of the product'),
+  date: z.string().describe('Date of the product'),
+  people: z.number().int().positive().describe('Number of people'),
 });
 
 export const TRANSACTION_200_RESPONSE_SCHEMA = z.object({

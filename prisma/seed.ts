@@ -7,29 +7,28 @@ const productData: Prisma.ProductCreateInput[] = [
     city: 'Tashkent',
     country: 'Uzbekistan',
     price: 500,
-    date: '2021-10-10',
-    people: 5,
+    // date: '2021-10-10',
   },
   {
     city: 'New York',
     country: 'USA',
     price: 20_000_000,
-    date: '2021-10-10',
-    people: 2,
+    // date: '2021-10-10',
+    // people: 2,
   },
   {
     city: 'Paris',
     country: 'France',
     price: 12_000_000,
-    date: '2021-10-10',
-    people: 3,
+    // date: '2021-10-10',
+    // people: 3,
   },
   {
     city: 'Berlin',
     country: 'Germany',
     price: 9_000_000,
-    date: '2021-10-10',
-    people: 4,
+    // date: '2021-10-10',
+    // people: 4,
   },
 ];
 
@@ -54,6 +53,7 @@ const transactionData: Prisma.TransactionCreateInput[] = [
     user: {
       connect: { id: 1 },
     },
+    date: '2021-10-10',
   },
 ];
 
@@ -78,12 +78,12 @@ async function main() {
   console.log(`Seeding finished.`);
 }
 
-main()
-  .then(async () => {
-    await prisma.$disconnect();
-  })
-  .catch(async (e) => {
-    console.error(e);
-    await prisma.$disconnect();
-    process.exit(1);
-  });
+// main()
+//   .then(async () => {
+//     await prisma.$disconnect();
+//   })
+//   .catch(async (e) => {
+//     console.error(e);
+//     await prisma.$disconnect();
+//     process.exit(1);
+//   });

@@ -24,6 +24,7 @@ import {
   PRODUCT_200_RESPONSE_SCHEMA,
   PRODUCT_400_RESPONSE_SCHEMA,
   PRODUCT_REQUEST_SCHEMA,
+  PRODUCTS_200_RESPONSE_SCHEMA,
 } from './schemas/product';
 import checkSign from './utils/checkSign';
 
@@ -320,6 +321,7 @@ app.withTypeProvider<ZodTypeProvider>().route({
 
     const transaction = await prisma.transaction.create({
       data: {
+        date: body.date,
         user_id: user.id,
         product_id: product.id,
       },
@@ -371,7 +373,6 @@ app.withTypeProvider<ZodTypeProvider>().route({
         city: body.city,
         price: body.price,
         country: body.country,
-        date: body.date,
       },
       select: { id: true },
     });
@@ -379,6 +380,28 @@ app.withTypeProvider<ZodTypeProvider>().route({
     return res.send({
       product_id: product.id,
     });
+  },
+});
+
+// Get products route
+app.withTypeProvider<ZodTypeProvider>().route({
+  method: 'GET',
+  url: '/products',
+  schema: {
+    response: {
+      200: PRODUCTS_200_RESPONSE_SCHEMA,
+    },
+  },
+  handler: async (req, res) => {
+    const products = await prisma.product.findMany({
+      select: {
+        id: true,
+        city: true,
+        country: true,
+      },
+    });
+
+    return res.send({ products });
   },
 });
 
