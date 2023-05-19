@@ -5,6 +5,7 @@ import { PrismaClient } from '@prisma/client';
 import fastifyFormbody from '@fastify/formbody';
 import qs from 'qs';
 import axios from 'axios';
+import cors from '@fastify/cors'
 
 import { ENV_SCHEMA } from './schemas/env';
 import {
@@ -31,6 +32,10 @@ import checkSign from './utils/checkSign';
 const env = ENV_SCHEMA.parse(process.env);
 const prisma = new PrismaClient();
 const app = fastify({ logger: false });
+
+app.register(cors, {
+  hook: 'preHandler',
+});
 
 app.register(fastifyFormbody, {
   parser: string => qs.parse(string, {
